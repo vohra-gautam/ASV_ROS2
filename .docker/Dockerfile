@@ -27,8 +27,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     terminator \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install essential Python libraries
-RUN pip3 install --no-cache-dir --upgrade pip \
+# Install essential Python libraries with retry logic
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir --timeout=100 --retries=5 \
     numpy \
     matplotlib \
     opencv-python \
@@ -42,14 +43,7 @@ RUN pip3 install --no-cache-dir --upgrade pip \
 
 # Install ROS 2 Humble packages for simulation
 RUN apt-get update && apt-get install -y --no-install-recommends \
-<<<<<<< HEAD
     ros-$ROS_DISTRO-rmw-cyclonedds-cpp \
-=======
-<<<<<<< HEAD
-=======
-    ros-$ROS_DISTRO-rmw-cyclonedds-cpp \
->>>>>>> d22e2a4 (initial)
->>>>>>> e3a76faffdbeeed5e0bb7cddc25ca0f9407191fb
     ros-$ROS_DISTRO-gazebo-ros-pkgs \
     ros-$ROS_DISTRO-gazebo-ros2-control \
     ros-$ROS_DISTRO-nav2-bringup \
@@ -69,26 +63,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-$ROS_DISTRO-ament-cmake \
     ros-$ROS_DISTRO-rviz2 \
     ros-$ROS_DISTRO-ros-gz \
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
     ros-$ROS_DISTRO-ros-gz-bridge \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install Gazebo Fortress
-RUN apt-get update && apt-get install -y lsb-release wget gnupg curl && \
-    sudo sh -c 'echo "deb [arch=amd64] http://packages.osrfoundation.org/gazebo/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/gazebo-stable.list' && \
-    curl -fsSL https://packages.osrfoundation.org/gazebo/gazebo-archive-keyring.gpg | sudo tee /usr/share/keyrings/gazebo-archive-keyring.gpg > /dev/null && \
-    sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 67170598AF249743 && \
-    apt-get update && \
-    apt-get install -y \
-    ignition-fortress \
-    ros-humble-ros-gz-sim \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-=======
->>>>>>> e3a76faffdbeeed5e0bb7cddc25ca0f9407191fb
-    ros-$ROS_DISTRO-ros-gz-bridge && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Gazebo Fortress
 RUN apt-get update && apt-get install -y lsb-release wget gnupg curl && \
@@ -97,13 +73,6 @@ RUN apt-get update && apt-get install -y lsb-release wget gnupg curl && \
     apt-get update && \
     apt-get install -y ignition-fortress ros-humble-ros-gz ros-humble-ros-gz-bridge && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
-
-
-
-<<<<<<< HEAD
-=======
->>>>>>> d22e2a4 (initial)
->>>>>>> e3a76faffdbeeed5e0bb7cddc25ca0f9407191fb
 
 # Set up ROS 2 workspace
 WORKDIR /
@@ -133,7 +102,7 @@ ENTRYPOINT ["bash", "/entrypoint.bash" ]
 
 CMD ["bash"]
 
-FROM build as dev
+FROM build AS dev
 SHELL ["zsh", "chsh -s ~/.zshrc" ]
 RUN ["/bin/bash", "-c", "cp /hull_ws/src/.docker/setup.zsh /hull_ws/setup.zsh && chmod 777 /hull_ws/setup.zsh"]
 RUN ["/bin/bash", "-c", "cp /hull_ws/src/.docker/entrypoint.zsh / && chmod 777 /entrypoint.zsh"]
